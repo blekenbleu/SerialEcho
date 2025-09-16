@@ -52,6 +52,7 @@ void start()
 #if TRYTWO
   SerHW.begin(19200);
 #endif
+  SetSer.print("USB_CFGBUFFER_LEN = "); SetSer.println(USB_CFGBUFFER_LEN);
   USB_Begin();
   SetSer.println("USB_Begin()");
   LEDb4();   
