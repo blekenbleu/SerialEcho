@@ -1,16 +1,18 @@
 #include <Arduino.h>
 #include "USBCDC.h"
 
-USBCDC Serial0;
 #define TRYTWO 0
+
+USBCDC Serial0;
+
 #if TRYTWO
 USBCDC Serial3;
-HardwareSerial SerHW(PA3, PA2);	// RX2, TX2 https://forum.arduino.cc/t/stm32f411ce-black-pill-serial-port-pin-mapping/907459
 #define SetSer SerHW
 #else
-HardwareSerial Serial3(PA3, PA2);
 #define SetSer Serial3
 #endif
+
+HardwareSerial SetSer(PA3, PA2);	// RX2, TX2 https://forum.arduino.cc/t/stm32f411ce-black-pill-serial-port-pin-mapping/907459
 
 char buffer[USB_EP_SIZE + 1], buffer2[USB_EP_SIZE + 1];
 unsigned long now, then, msec;
@@ -47,16 +49,13 @@ void wait()
 
 void start()
 {
-  Serial0.begin(19200);
-  Serial3.begin(19200);
-#if TRYTWO
-  SerHW.begin(19200);
-#endif
+  LEDb4();   
+  SetSer.begin(19200);
   SetSer.print("USB_CFGBUFFER_LEN = "); SetSer.println(USB_CFGBUFFER_LEN);
+  SetSer.print("USB_EP_SIZE = "); SetSer.println(USB_EP_SIZE);
   USB_Begin();
   SetSer.println("USB_Begin()");
-  LEDb4();   
-
+/*
   while (!USB_Running())
   {
     // until usb connected
@@ -64,6 +63,13 @@ void start()
     LEDb4();
   }
   SetSer.println("USB_Running()");
+ */
+
+  Serial0.begin(19200);
+#if TRYTWO
+  SetSer.println("Trying for composite USB");
+  Serial3.begin(19200);
+#endif
   while (!Serial0)
     wait();
   Serial0.println("Serial0_Running()");
@@ -82,7 +88,6 @@ void setup()
   pinMode(PC13, OUTPUT);    // LED
   LEDb4();
   start();
-  SetSer.print("USB_EP_SIZE = "); SetSer.println(USB_EP_SIZE);
   now = then = millis();
 }
 
@@ -130,7 +135,7 @@ void loop()
       for (int i; i < l; i++)
       {
         buffer2[j++] = Serial3.read();
-        if (j >= (USB_EP_SIZE - 2) || 10 == buffer2[j-1])
+        if (j >= (USB_EP_SIZE - 2) || 13 == buffer2[j-1]) // PuTTY Enter key default
         {
           buffer2[j] = '\0';
           Serial3.println((j == Serial0.write(buffer2, j)) ? "ok" : "fail");
