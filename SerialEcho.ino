@@ -120,7 +120,7 @@ void loop()
 
   while (0 < (l = Serial0.available()) && millis() > 50 + now)
   {
-    int i, a = SerialC.availableForWrite();
+    int i, a = SerialC.availableForWrite();			// buffered Serial Monitor
 
     timeout = false;
     if (a > USB_EP_SIZE)
@@ -140,7 +140,7 @@ void loop()
     now = millis();
   }
 
-  while (0 < (l = SerialC.available()))
+  while (0 < (l = SerialC.available()))					// unbuffered PuTTY
   {
     int a = Serial0.availableForWrite();
 
@@ -171,7 +171,7 @@ void loop()
   if (millis() > 10000 + now && ! timeout)    // suspiciously quiet
   {
     Serial0.println("waiting...");
-    SerialC.println("waiting...");
+    SerialC.println("waiting for PuTTY...");
     msec = 1250;
     timeout = true;
     now = millis();

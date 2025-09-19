@@ -19,3 +19,6 @@ Unable to get a [composite CDC + MIDI USB device Arduino 2 sketch](https://githu
 - [enumeration](BluePill.txt)  
 
 STM32F411 USB_OTG_FS has only 3 endpoints instead of 7 on F103C8.  
+
+Amazon Blue Pills report 128KB flash size by ST-Link  
+![](AmazonSTM32F103C8T6.jpg)
