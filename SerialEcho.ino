@@ -27,7 +27,7 @@ HardwareSerial SetSer(PA3, PA2);	// RX2, TX2 https://forum.arduino.cc/t/stm32f41
 //#elif defined(BLUEPILL_F103C6)  || defined(BLUEPILL_F103C8)  || defined(BLUEPILL_F103CB)
 //#endif
 
-char buffer[USB_EP_SIZE + 1], buffer2[USB_EP_SIZE + 1];
+char buffer0[USB_EP_SIZE + 1], bufferC[USB_EP_SIZE + 1];
 unsigned long now, then, msec;
 bool toggle = true, timeout = false;
 
@@ -132,9 +132,9 @@ void loop()
     else
     {
       for (i = 0; i < l; i++)
-        buffer[i] = Serial0.read();
-      buffer[i - 1] = '\0';
-      Serial0.println((l <= SerialC.println(buffer)) ? "ok" : "fail");
+        buffer0[i] = Serial0.read();
+      buffer0[i - 1] = '\0';
+      Serial0.println((l <= SerialC.println(buffer0)) ? "ok" : "fail");
       msec = 100;
     }
     now = millis();
@@ -142,6 +142,8 @@ void loop()
 
   while (0 < (l = SerialC.available()))					// unbuffered PuTTY
   {
+//  SetSer.print("SerialC.available ");
+//  SetSer.println(l);
     int a = Serial0.availableForWrite();
 
     if (a > USB_EP_SIZE)
@@ -149,16 +151,23 @@ void loop()
     if (l > a)
       l = a;
     if (0 >= l)
-      SerialC.println("Serial0 unavail");
+    {
+      SetSer.println("Serial0 unavail");
+      SetSer.write(SerialC.read());
+    }
     else
     {
+      byte b;
+
       for (int i; i < l; i++)
       {
-        buffer2[j++] = SerialC.read();
-        if (j >= (USB_EP_SIZE - 2) || 13 == buffer2[j-1]) // PuTTY Enter key default
+        bufferC[j++] = b = SerialC.read();
+        SetSer.write(b);
+        if (j >= (USB_EP_SIZE - 2) || 13 == bufferC[j-1]) // PuTTY Enter key default
         {
-          buffer2[j] = '\0';
-          SerialC.println((j == Serial0.write(buffer2, j)) ? "ok" : "fail");
+          bufferC[j++] = 10;
+          bufferC[j] = '\0';
+          SerialC.println((j == Serial0.write(bufferC, j)) ? "\r\nok" : "\r\nfail");
           j = 0;
           msec = 200;
           timeout = false;
